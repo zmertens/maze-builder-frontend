@@ -18,7 +18,7 @@ const MazeBuilderComponent = () => {
     // Check if the script is already loaded
     if (!document.querySelector('script[src="/public/maze_builder.js"]')) {
       const script = document.createElement("script");
-      script.src = "/public/maze_builder.js";
+      script.src = "/maze_builder.js";
       script.async = true;
   
       document.body.appendChild(script);

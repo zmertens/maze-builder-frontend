@@ -17,7 +17,7 @@ const DownloadComponent = () => {
     // Check if the script is already loaded
     if (!document.querySelector('script[src="/public/maze_builder.js"]')) {
       const script = document.createElement("script");
-      script.src = "/public/maze_builder.js";
+      script.src = "/maze_builder.js";
       script.async = true;
       script.onload = () => {
         // Initialization or configuration code here
