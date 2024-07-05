@@ -3,10 +3,8 @@ import MazeBuilderComponent from './components/MazeBuilderComponent'
 import './App.css'
 import Header from './components/HeaderComponent'
 import { BrowserRouter as Router } from 'react-router-dom';
-import DownloadComponent from './components/DownloadComponent';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   const headerStyle: CSSProperties = {
     width: '100%',
@@ -33,9 +31,6 @@ function App() {
       <h1>Maze Builder</h1>
       <div className="card">
        <MazeBuilderComponent />
-      </div>
-      <div>
-        <DownloadComponent />
       </div>
 
     </>

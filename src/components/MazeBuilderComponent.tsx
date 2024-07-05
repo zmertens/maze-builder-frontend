@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 const MazeBuilderComponent = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [isModuleReady, setIsModuleReady] = useState(false);
 
   useEffect(() => {
+    loadWASM();
+    
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
@@ -16,31 +19,41 @@ const MazeBuilderComponent = () => {
 
   const loadWASM = async () => {
     // Check if the script is already loaded
-    if (!document.querySelector('script[src="/public/maze_builder.js"]')) {
+
       const script = document.createElement("script");
       script.src = "/maze_builder.js";
-      script.async = true;
+      // script.async = true;
   
       document.body.appendChild(script);
   
       script.onload = () => {
-        if (typeof Module === 'function') {
-          window.Module = Module({ canvas: document.getElementById("canvas") });
-        } else {
-          console.error('Module is not defined or not a function');
-        }
+          window.Module = {
+            canvas: document.getElementById("canvas"),
+            onRuntimeInitialized: () => {
+              setIsModuleReady(true);
+              console.log('Module is ready');    
+            }
+          };
       };
-    }
-  };
+  }; // loadWASM
 
-  useEffect(() => {
-      loadWASM();
-  }, []);
+  const handleDownloadClick = () => {
+    if (!isModuleReady || !window.Module.do_stuff()) {
+        console.error('Module is not ready');
+        return;
+    }
+    const mazeInfoStr = window.Module.do_stuff();
+    const mazeInfo = JSON.parse(mazeInfoStr);
+    console.log("Maze Name:", mazeInfo.name);
+    console.log("Maze Data:", mazeInfo.data);
+  };
 
   return (
       <div>
-        <h1> Build - Download Mazes</h1>
+        <h1> Build and Download Mazes</h1>
         <canvas id="canvas" width={windowWidth} style={{ backgroundColor : 'blue'}} onContextMenu={ (event) => event.preventDefault() } />            
+        <br />
+        <button id="buildButton" onClick={handleDownloadClick} disabled={!isModuleReady}>Build!</button>
       </div>
   );
 
