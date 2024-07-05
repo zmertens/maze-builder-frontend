@@ -1,8 +1,9 @@
 import { useState, CSSProperties } from 'react'
-import MazeBuilderCanvas from './components/MazeBuilderComponent'
+import MazeBuilderComponent from './components/MazeBuilderComponent'
 import './App.css'
 import Header from './components/HeaderComponent'
 import { BrowserRouter as Router } from 'react-router-dom';
+import DownloadComponent from './components/DownloadComponent';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -31,7 +32,10 @@ function App() {
       </div>
       <h1>Maze Builder</h1>
       <div className="card">
-       <MazeBuilderCanvas />
+       <MazeBuilderComponent />
+      </div>
+      <div>
+        <DownloadComponent />
       </div>
 
     </>
