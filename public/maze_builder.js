@@ -142,7 +142,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpmf_r7k97.js
+// include: /tmp/tmpfy51o8v6.js
 if (!Module.expectedDataFileDownloads) {
   Module.expectedDataFileDownloads = 0;
 }
@@ -368,23 +368,23 @@ Module.expectedDataFileDownloads++;
   });
 })();
 
-// end include: /tmp/tmpmf_r7k97.js
-// include: /tmp/tmpf9vvsrg_.js
+// end include: /tmp/tmpfy51o8v6.js
+// include: /tmp/tmpaodyhemg.js
 // All the pre-js content up to here must remain later on, we need to run
 // it.
 if (Module["$ww"] || (typeof ENVIRONMENT_IS_PTHREAD != "undefined" && ENVIRONMENT_IS_PTHREAD)) Module["preRun"] = [];
 
 var necessaryPreJSTasks = Module["preRun"].slice();
 
-// end include: /tmp/tmpf9vvsrg_.js
-// include: /tmp/tmp4yqwo4i0.js
+// end include: /tmp/tmpaodyhemg.js
+// include: /tmp/tmpv6y8s3eh.js
 if (!Module["preRun"]) throw "Module.preRun should exist because file support used it; did a pre-js delete it?";
 
 necessaryPreJSTasks.forEach(task => {
   if (Module["preRun"].indexOf(task) < 0) throw "All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?";
 });
 
-// end include: /tmp/tmp4yqwo4i0.js
+// end include: /tmp/tmpv6y8s3eh.js
 // Sometimes an existing Module object exists with properties
 // meant to overwrite the default module functionality. Here
 // we collect those properties and reapply _after_ we configure
@@ -1564,7 +1564,7 @@ function dbg(...args) {
 // end include: runtime_debug.js
 // === Body ===
 var ASM_CONSTS = {
-  278784: $0 => {
+  278800: $0 => {
     var str = UTF8ToString($0) + "\n\n" + "Abort/Retry/Ignore/AlwaysIgnore? [ariA] :";
     var reply = window.prompt(str, "i");
     if (reply === null) {
@@ -1572,7 +1572,7 @@ var ASM_CONSTS = {
     }
     return allocate(intArrayFromString(reply), "i8", ALLOC_NORMAL);
   },
-  279009: () => {
+  279025: () => {
     if (typeof (AudioContext) !== "undefined") {
       return true;
     } else if (typeof (webkitAudioContext) !== "undefined") {
@@ -1580,7 +1580,7 @@ var ASM_CONSTS = {
     }
     return false;
   },
-  279156: () => {
+  279172: () => {
     if ((typeof (navigator.mediaDevices) !== "undefined") && (typeof (navigator.mediaDevices.getUserMedia) !== "undefined")) {
       return true;
     } else if (typeof (navigator.webkitGetUserMedia) !== "undefined") {
@@ -1588,7 +1588,7 @@ var ASM_CONSTS = {
     }
     return false;
   },
-  279390: $0 => {
+  279406: $0 => {
     if (typeof (Module["SDL3"]) === "undefined") {
       Module["SDL3"] = {};
     }
@@ -1612,8 +1612,8 @@ var ASM_CONSTS = {
     }
     return SDL3.audioContext === undefined ? -1 : 0;
   },
-  279960: () => Module["SDL3"].audioContext.sampleRate,
-  280011: ($0, $1, $2, $3) => {
+  279976: () => Module["SDL3"].audioContext.sampleRate,
+  280027: ($0, $1, $2, $3) => {
     var SDL3 = Module["SDL3"];
     var have_microphone = function(stream) {
       if (SDL3.audio_recording.silenceTimer !== undefined) {
@@ -1655,7 +1655,7 @@ var ASM_CONSTS = {
       }, have_microphone, no_microphone);
     }
   },
-  281852: ($0, $1, $2, $3) => {
+  281868: ($0, $1, $2, $3) => {
     var SDL3 = Module["SDL3"];
     SDL3.audio_playback.scriptProcessorNode = SDL3.audioContext["createScriptProcessor"]($1, 0, $0);
     SDL3.audio_playback.scriptProcessorNode["onaudioprocess"] = function(e) {
@@ -1687,7 +1687,7 @@ var ASM_CONSTS = {
       SDL3.audio_playback.silenceTimer = setInterval(silence_callback, ($1 / SDL3.audioContext.sampleRate) * 1e3);
     }
   },
-  283168: $0 => {
+  283184: $0 => {
     var SDL3 = Module["SDL3"];
     if ($0) {
       if (SDL3.audio_recording.silenceTimer !== undefined) {
@@ -1721,7 +1721,7 @@ var ASM_CONSTS = {
       SDL3.audioContext = undefined;
     }
   },
-  284324: ($0, $1) => {
+  284340: ($0, $1) => {
     var SDL3 = Module["SDL3"];
     var numChannels = SDL3.audio_playback.currentPlaybackBuffer["numberOfChannels"];
     for (var c = 0; c < numChannels; ++c) {
@@ -1734,7 +1734,7 @@ var ASM_CONSTS = {
       }
     }
   },
-  284828: ($0, $1) => {
+  284844: ($0, $1) => {
     var SDL3 = Module["SDL3"];
     var numChannels = SDL3.audio_recording.currentRecordingBuffer.numberOfChannels;
     for (var c = 0; c < numChannels; ++c) {
@@ -1753,14 +1753,14 @@ var ASM_CONSTS = {
       }
     }
   },
-  285455: () => {
+  285471: () => {
     if (typeof (Module["SDL3"]) === "undefined") {
       Module["SDL3"] = {};
     }
     Module["SDL3"].camera = {};
   },
-  285556: () => (navigator.mediaDevices === undefined) ? 0 : 1,
-  285615: ($0, $1, $2, $3, $4, $5, $6) => {
+  285572: () => (navigator.mediaDevices === undefined) ? 0 : 1,
+  285631: ($0, $1, $2, $3, $4, $5, $6) => {
     const device = $0;
     const w = $1;
     const h = $2;
@@ -1834,7 +1834,7 @@ var ASM_CONSTS = {
       dynCall("viiiii", outcome, [ device, 0, 0, 0, 0 ]);
     });
   },
-  287920: () => {
+  287936: () => {
     const SDL3 = Module["SDL3"];
     if ((typeof (SDL3) === "undefined") || (typeof (SDL3.camera) === "undefined") || (typeof (SDL3.camera.stream) === "undefined")) {
       return;
@@ -1843,7 +1843,7 @@ var ASM_CONSTS = {
     _SDL_free(SDL3.camera.rgba);
     SDL3.camera = {};
   },
-  288200: ($0, $1, $2) => {
+  288216: ($0, $1, $2) => {
     const w = $0;
     const h = $1;
     const rgba = $2;
@@ -1856,12 +1856,12 @@ var ASM_CONSTS = {
     Module.HEAPU8.set(imgrgba, rgba);
     return 1;
   },
-  288585: () => {
+  288601: () => {
     if (typeof (Module["SDL3"]) !== "undefined") {
       Module["SDL3"].camera = undefined;
     }
   },
-  288672: ($0, $1, $2, $3) => {
+  288688: ($0, $1, $2, $3) => {
     var w = $0;
     var h = $1;
     var pixels = $2;
@@ -1921,7 +1921,7 @@ var ASM_CONSTS = {
     }
     SDL3.ctx.putImageData(SDL3.image, 0, 0);
   },
-  289904: ($0, $1, $2, $3, $4) => {
+  289920: ($0, $1, $2, $3, $4) => {
     var w = $0;
     var h = $1;
     var hot_x = $2;
@@ -1942,18 +1942,18 @@ var ASM_CONSTS = {
     stringToUTF8(url, urlBuf, url.length + 1);
     return urlBuf;
   },
-  290559: $0 => {
+  290575: $0 => {
     if (Module["canvas"]) {
       Module["canvas"].style["cursor"] = UTF8ToString($0);
     }
   },
-  290642: () => {
+  290658: () => {
     if (Module["canvas"]) {
       Module["canvas"].style["cursor"] = "none";
     }
   },
-  290711: () => window.innerWidth,
-  290741: () => window.innerHeight
+  290727: () => window.innerWidth,
+  290757: () => window.innerHeight
 };
 
 // end include: preamble.js

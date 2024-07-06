@@ -18,27 +18,20 @@ const MazeBuilderComponent = () => {
   }, []);
 
   const loadWASM = async () => {
-    // Check if the script is already loaded
-
       const script = document.createElement("script");
       script.src = "/maze_builder.js";
-      // script.async = true;
-  
       document.body.appendChild(script);
   
-      script.onload = () => {
-          window.Module = {
-            canvas: document.getElementById("canvas"),
-            onRuntimeInitialized: () => {
-              setIsModuleReady(true);
-              console.log('Module is ready');    
-            }
-          };
-      };
-  }; // loadWASM
+      // This was pretty tricky because of how React handles component lifecycles
+      // WASM files are asynchronous, so we need to wait for the script to load
+      script.onload = async () => {
+        window.Module = await Module({ canvas : document.getElementById("canvas")});
+        setIsModuleReady(true);
+        }
+   }; // loadWASM
 
   const handleDownloadClick = () => {
-    if (!isModuleReady || !window.Module.do_stuff()) {
+    if (!isModuleReady) {
         console.error('Module is not ready');
         return;
     }
@@ -53,7 +46,7 @@ const MazeBuilderComponent = () => {
         <h1> Build and Download Mazes</h1>
         <canvas id="canvas" width={windowWidth} style={{ backgroundColor : 'blue'}} onContextMenu={ (event) => event.preventDefault() } />            
         <br />
-        <button id="buildButton" onClick={handleDownloadClick} disabled={!isModuleReady}>Build!</button>
+        <button onClick={handleDownloadClick} disabled={!isModuleReady} >Download Maze</button>
       </div>
   );
 
