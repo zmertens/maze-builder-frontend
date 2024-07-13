@@ -4,6 +4,7 @@
 
 Provides the Maze Builder application with a web interface.
 
+![mazebuilderweb](mazebuilderweb.png)
 
 Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml
@@ -26,9 +27,11 @@ There is a multi-step process to spin up the frontend with [Vite](https://vitejs
     - `maze_builder.wasm` under `src/`
     - `maze_builder.wasm.map` under `src/`
     - `maze_builder.worker.js` under `src/`
+    - `maze_builder.worker.mjs` under `src/`
     - `maze_builder.data` under `/public`
+    
 3. From the root of this repo, run `npm i` and then `npm run dev` , this will cause Vite to spin up a local server.
      - Open a browser with the specified port. For example, `localhost:5173`
 4. The application should be running in the browser - verify with Dev Tools and console output.
 
-Additionally, one can run a local Python server directly from MazeBuilder's C++ build repo using [secure_http_server.py](https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py).
+Additionally, one can run a local Python server directly from MazeBuilder's C++ build repo using [secure_http_server.py](https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py) (**requires `index.html`**).
