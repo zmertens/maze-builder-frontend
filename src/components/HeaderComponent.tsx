@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CSSProperties } from 'react';
 
 const headerTabStyle: CSSProperties = {

@@ -1,4 +1,4 @@
-import { useState, CSSProperties } from 'react'
+import { CSSProperties } from 'react'
 import MazeBuilderComponent from './components/MazeBuilderComponent'
 import './App.css'
 import Header from './components/HeaderComponent'

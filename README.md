@@ -2,7 +2,10 @@
 
 # maze-builder-frontend
 
-Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distribute securely using `netlify.toml`:
+Provides the Maze Builder application with a web interface.
+
+
+Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml
 [[headers]]
   for = "/*"
@@ -11,15 +14,21 @@ Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.n
     Cross-Origin-Embedder-Policy = "require-corp"
 ```
 
-Public files are generated using [https://www.github.com/zmertens/MazeBuilder](https://www.github.com/zmertens/MazeBuilder).
-The steps to spin up the frontend is a multi-step process:
-1. Generate JavaScript and WebAssembly files from MazeBuilder's C++ codebase. This is done with Emscripten toolchain and CMake.
-   - [https://github.com/zmertens/MazeBuilder/blob/dev/README.md#cmake](https://github.com/zmertens/MazeBuilder/blob/dev/README.md#cmake)
-2. Put the generated JS/WASM files in the frontend repo under the `/public/` folder.
-   - [https://github.com/zmertens/maze-builder-frontend/tree/main/public](https://github.com/zmertens/maze-builder-frontend/tree/main/public)
-3. From the root of the frontend source code, run `npm i` and then `npm run dev`.
-   1. This should start the Vite server, open a browser with the specified port. For example, `localhost:5173`
-4. The application should be running in the browser.
+## Build and Run
 
-Additionally, one can run a local Python server directly from MazeBuilder's C++ repo using `secure_python_server.py`.
-  - [https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py](https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py)
+JavaScript glue code and files are generated using [Emscripten](https://emscripten.org/index.html) and [https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake](https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake).
+
+There is a multi-step process to spin up the frontend with [Vite](https://vitejs.dev/):
+1. Generate JavaScript and WebAssembly files from MazeBuilder's C++ codebase. This is done with Emscripten and CMake.
+   - Please note that there are different performances and optimizations between the build configurations.
+2. Move these generated files from the C++ repo to this one:
+     - `maze_builder.js` under `src/`
+    - `maze_builder.wasm` under `src/`
+    - `maze_builder.wasm.map` under `src/`
+    - `maze_builder.worker.js` under `src/`
+    - `maze_builder.data` under `/public`
+3. From the root of this repo, run `npm i` and then `npm run dev` , this will cause Vite to spin up a local server.
+     - Open a browser with the specified port. For example, `localhost:5173`
+4. The application should be running in the browser - verify with Dev Tools and console output.
+
+Additionally, one can run a local Python server directly from MazeBuilder's C++ build repo using [secure_http_server.py](https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py).
