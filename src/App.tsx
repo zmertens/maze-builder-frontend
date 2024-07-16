@@ -1,10 +1,14 @@
-import { CSSProperties } from 'react'
-import MazeBuilderComponent from './components/MazeBuilderComponent'
 import './App.css'
 import Header from './components/HeaderComponent'
 import { BrowserRouter as Router } from 'react-router-dom';
+import React, { useEffect, useState, CSSProperties, Suspense } from 'react';
 
 function App() {
+  const [isDomAvailable, setIsDomAvailable] = useState(false);
+
+  useEffect(() => {
+    setIsDomAvailable(true)
+  }, []);
 
   const headerStyle: CSSProperties = {
     width: '100%',
@@ -21,6 +25,8 @@ function App() {
     flexWrap: 'nowrap',
   }
 
+  const DynamicComponent = React.lazy(() => isDomAvailable ? import('./components/MazeBuilderComponent') : Promise.resolve({ default: () => <div /> }));
+
   return (
     <>
       <div style={headerStyle}> 
@@ -30,7 +36,9 @@ function App() {
       </div>
       <h1>Maze Builder</h1>
       <div className="card">
-       <MazeBuilderComponent />
+        <Suspense fallback={<div>Loading...</div>}>
+          {isDomAvailable && <DynamicComponent />}
+       </Suspense>
       </div>
 
     </>
