@@ -1,15 +1,15 @@
 /// <reference types="emscripten" />
 // https://ecolingui.ca/en/blog/emguide-3/
-declare class craft {
-    is_json_rdy(): boolean;
+export declare class craft {
+    json: string;
+    x: number;
+    set_json(): void;
     get_json(): string;
     delete(): void;
 }
 
 interface MazeBuilderModule extends EmscriptenModule {
-    craft: {
-        new(window_title: string, help: string, version: string): craft;
-    }
+    get_instance: (window_title: string, help: string, version: string) => craft;
 }
 
 declare const Module: EmscriptenModuleFactory<MazeBuilderModule>;
