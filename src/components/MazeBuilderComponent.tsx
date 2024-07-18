@@ -28,14 +28,12 @@ const MazeBuilderComponent = () => {
       intervalId = setInterval(() => {
         
         try {
-          // const mazeInfoJson = instance.get_json()!;
           const mazeInfoJson = mbi.get_json();
           if (mazeInfoJson !== "") {
             const mazeInfo = JSON.parse(mazeInfoJson);
             // Check if user creates a unique maze name
             if (mazeInfo && mazeInfo.name[0] !== ".") {
               setMazeInfo(mazeInfo);
-              // Stop polling
               clearInterval(intervalId);
             }
           }
@@ -59,6 +57,7 @@ const MazeBuilderComponent = () => {
       if (instance) {
         console.log("Deleting instance");
         instance.delete();
+        setInstance(null);
       }
       window.removeEventListener("resize", handleResize);
     }
@@ -68,13 +67,12 @@ const MazeBuilderComponent = () => {
     try {
       // Check before creating a download button for the JSON
       if (mazeInfo !== null) {
-        const dataStr = JSON.stringify(mazeInfo.data);
+        const data = JSON.stringify(mazeInfo.data).split(",");
         let dataCombined = "";
-        for (let i = 0; i < dataStr.length; i++) {
-          dataCombined += dataStr[i].replace(/[\[|\]|\"|\n,]/, "");
+        for (let i = 0; i < data.length; i++) {
+          dataCombined += data[i].replace(/\"|\]|\[/g, '') + "\n";
         }
-        console.log(dataCombined);
-        const blob = new Blob([dataCombined], { type: "application/json" });
+        const blob = new Blob([dataCombined], { type: "application/text" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

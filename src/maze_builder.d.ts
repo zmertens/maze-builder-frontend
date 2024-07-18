@@ -2,7 +2,6 @@
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
     json: string;
-    x: number;
     set_json(): void;
     get_json(): string;
     delete(): void;
