@@ -5,6 +5,7 @@
 Provides the Maze Builder application with a web interface.
 
 ![mazebuilderweb](mazebuilderweb.png)
+![mazebuilderweb2](mazebuilderweb2.png)
 
 Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml
