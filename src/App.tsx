@@ -1,6 +1,4 @@
 import './App.css'
-import Header from './components/HeaderComponent'
-import { BrowserRouter as Router } from 'react-router-dom';
 import React, { useEffect, useState, CSSProperties, Suspense } from 'react';
 
 function App() {
@@ -30,9 +28,6 @@ function App() {
   return (
     <>
       <div style={headerStyle}> 
-        <Router>
-          <Header />
-        </Router>
       </div>
       <h1>Maze Builder</h1>
       <div className="card">
