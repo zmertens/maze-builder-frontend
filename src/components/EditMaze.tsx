@@ -20,7 +20,7 @@ function EditMaze({ mazedata }: FormProps) {
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
-  const [car, setMaze] = useState<Maze>({
+  const [maze, setMaze] = useState<Maze>({
     file: "",
     algorithm: "",
     width: 0,
@@ -39,7 +39,7 @@ function EditMaze({ mazedata }: FormProps) {
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMaze({ ...car, [event.target.name]: event.target.value });
+    setMaze({ ...maze, [event.target.name]: event.target.value });
   };
 
   const handleClickOpen = () => {
@@ -60,8 +60,8 @@ function EditMaze({ mazedata }: FormProps) {
 
   const handleSave = () => {
     const url = mazedata._links.self.href;
-    const MazeEntry: MazeEntry = { maze, url };
-    mutate(MazeEntry);
+    const mazeEntry: MazeEntry = { maze, url };
+    mutate(mazeEntry);
     setMaze({
       file: "",
       algorithm: "",
