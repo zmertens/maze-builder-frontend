@@ -1,43 +1,46 @@
-import './App.css'
-import React, { useEffect, useState, CSSProperties, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from "react";
+
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import CssBaseline from "@mui/material/CssBaseline";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Mazelist from "./components/Mazelist";
+
+const queryClient = new QueryClient();
 
 function App() {
   const [isDomAvailable, setIsDomAvailable] = useState(false);
 
   useEffect(() => {
-    setIsDomAvailable(true)
+    setIsDomAvailable(true);
   }, []);
 
-  const headerStyle: CSSProperties = {
-    width: '100%',
-    height: '60px',
-    backgroundColor: '#333',
-    color: 'white',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-    flexWrap: 'nowrap',
-  }
-
-  const DynamicComponent = React.lazy(() => isDomAvailable ? import('./components/MazeBuilderComponent') : Promise.resolve({ default: () => <div /> }));
+  const DynamicComponent = React.lazy(() =>
+    isDomAvailable
+      ? import("./components/MazeBuilderComponent")
+      : Promise.resolve({ default: () => <div /> })
+  );
 
   return (
-    <>
-      <div style={headerStyle}> 
-      </div>
-      <h1>Maze Builder</h1>
-      <div className="card">
-        <Suspense fallback={<div>Loading...</div>}>
-          {isDomAvailable && <DynamicComponent />}
-       </Suspense>
-      </div>
-
-    </>
-  )
+    <Container maxWidth="xl">
+      <CssBaseline />
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6">Mazes</Typography>
+        </Toolbar>
+      </AppBar>
+      <QueryClientProvider client={queryClient}>
+        <Mazelist />
+        <Container className="card">
+          <Suspense fallback={<Container>Loading...</Container>}>
+            {isDomAvailable && <DynamicComponent />}
+          </Suspense>
+        </Container>
+      </QueryClientProvider>
+    </Container>
+  );
 }
 
-export default App
+export default App;
