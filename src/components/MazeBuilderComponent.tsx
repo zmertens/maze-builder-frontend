@@ -6,8 +6,29 @@ const MazeBuilderComponent = () => {
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
 
+  let intervalId = -1;
+
+  const pollForMazeData = (mbi: craft) => {
+    // Polling for data readiness
+    intervalId = setInterval(() => {
+      
+      try {
+        const mazeInfoJson = mbi.get_json();
+        if (mazeInfoJson !== "") {
+          const mazeInfo = JSON.parse(mazeInfoJson);
+          // Check if user creates a unique maze name
+          if (mazeInfo && mazeInfo.name[0] !== ".") {
+            setMazeInfo(mazeInfo);
+            clearInterval(intervalId);
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    }, 1000); // Check every 1 second
+  }; // pollForMazeData
+
   useEffect(() => {
-    let intervalId = -1;
     const loadModule = async () => {
       const activeModule = await Module();
       if (activeModule) {
@@ -22,26 +43,6 @@ const MazeBuilderComponent = () => {
     };
 
     loadModule();
-
-    const pollForMazeData = (mbi: craft) => {
-      // Polling for data readiness
-      intervalId = setInterval(() => {
-        
-        try {
-          const mazeInfoJson = mbi.get_json();
-          if (mazeInfoJson !== "") {
-            const mazeInfo = JSON.parse(mazeInfoJson);
-            // Check if user creates a unique maze name
-            if (mazeInfo && mazeInfo.name[0] !== ".") {
-              setMazeInfo(mazeInfo);
-              clearInterval(intervalId);
-            }
-          }
-        } catch (error) {
-          console.error("Error parsing JSON:", error);
-        }
-      }, 1000); // Check every 1 second
-    }; // pollForMazeData
 
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -82,6 +83,8 @@ const MazeBuilderComponent = () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         setMazeInfo(null);
+        instance?.set_json("");
+        pollForMazeData(instance as craft);
       };
     } catch (error) {
       console.error("Error creating instance:", error);

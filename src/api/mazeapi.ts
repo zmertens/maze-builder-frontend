@@ -1,11 +1,12 @@
 import axios from "axios";
 import { Maze, MazeResponse, MazeEntry } from "../maze_builder";
 
-const API_URL = "https://Mazebuilder-env-1.eba-8z5uxtbj.us-east-2.elasticbeanstalk.com";
+const API_URL = "http://Mazebuilder-env-1.eba-8z5uxtbj.us-east-2.elasticbeanstalk.com";
+// const API_URL = "http://localhost:8080";
 
 export const getMazes = async (): Promise<MazeResponse[]> => {
   const response = await axios.get(`${API_URL}/api/mazes`);
-  return response.data._embedded.Mazes;
+  return response.data._embedded.mazes;
 };
 
 export const deleteMaze = async (link: string): Promise<MazeResponse> => {
@@ -14,10 +15,7 @@ export const deleteMaze = async (link: string): Promise<MazeResponse> => {
 };
 
 export const addMaze = async (Maze: Maze): Promise<MazeResponse> => {
-  const response = await axios.post(
-    `${API_URL}/api/mazes`,
-    Maze
-  );
+  const response = await axios.post(`${API_URL}/api/mazes`, Maze);
   return response.data;
 };
 

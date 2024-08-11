@@ -33,12 +33,12 @@ function Mazelist() {
   });
 
   const columns: GridColDef[] = [
-    { field: "brand", headerName: "Brand", width: 200 },
-    { field: "model", headerName: "Model", width: 200 },
-    { field: "color", headerName: "Color", width: 200 },
-    { field: "registrationNumber", headerName: "Reg.nr.", width: 150 },
-    { field: "modelYear", headerName: "Model Year", width: 150 },
-    { field: "price", headerName: "Price", width: 150 },
+    { field: "file", headerName: "File", width: 200 },
+    { field: "algorithm", headerName: "Algorithm", width: 200 },
+    { field: "width", headerName: "Width", width: 200 },
+    { field: "length", headerName: "Length", width: 150 },
+    { field: "height", headerName: "Height", width: 150 },
+    { field: "seed", headerName: "Seed", width: 150 },
     {
       field: "edit",
       headerName: "",

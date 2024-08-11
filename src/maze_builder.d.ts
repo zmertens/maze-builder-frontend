@@ -1,7 +1,7 @@
 /// <reference types="emscripten" />
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
-  set_json(): void;
+  set_json(string): void;
   get_json(): string;
   delete(): void;
 }

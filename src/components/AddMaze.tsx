@@ -58,7 +58,7 @@ function AddMaze() {
 
   return (
     <>
-      <Button onClick={handleClickOpen}>New Car</Button>
+      <Button onClick={handleClickOpen}>New Maze</Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>New maze</DialogTitle>
         <MazeDialogContent maze={maze} handleChange={handleChange} />

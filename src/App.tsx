@@ -32,12 +32,12 @@ function App() {
         </Toolbar>
       </AppBar>
       <QueryClientProvider client={queryClient}>
-        <Mazelist />
         <Container className="card">
           <Suspense fallback={<Container>Loading...</Container>}>
             {isDomAvailable && <DynamicComponent />}
           </Suspense>
         </Container>
+        <Mazelist />
       </QueryClientProvider>
     </Container>
   );
