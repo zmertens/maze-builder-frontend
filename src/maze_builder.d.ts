@@ -7,7 +7,7 @@ export declare class craft {
 }
 
 interface MazeBuilderModule extends EmscriptenModule {
-  get_instance: (window_title: string, help: string, version: string) => craft;
+  get_instance: (v: string, h: string, w: number, h: number) => craft;
 }
 
 export type MazeResponse = {

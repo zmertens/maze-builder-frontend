@@ -32,7 +32,7 @@ const MazeBuilderComponent = () => {
     const loadModule = async () => {
       const activeModule = await Module();
       if (activeModule) {
-        let mbi = activeModule.craft.get_instance("Maze Builder", "Web", "NA");
+        let mbi = activeModule.craft.get_instance("Maze Builder", "", 0, 0);
         if (mbi) {
           setInstance(mbi);
           pollForMazeData(mbi);
@@ -64,6 +64,22 @@ const MazeBuilderComponent = () => {
     }
   }, []); // useEffect
 
+  const requestFullscreen = () => {
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    }
+  }; // requestFullscreen
+
+  const toggleAudio = () => {
+    const audioButton = document.getElementById("btn-audio") as HTMLInputElement;
+    if (audioButton.value === "🔊 UNMUTE") {
+      audioButton.value = "🔇 MUTE";
+    } else {
+      audioButton.value = "🔊 UNMUTE";
+    }
+  }; // toggleAudio
+
   const handleDownloadClick = async () => {
     try {
       // Check before creating a download button for the JSON
@@ -92,8 +108,16 @@ const MazeBuilderComponent = () => {
   }; // handleDownloadClick
 
   return (
-    <div>
-      <h1> Build and Download Mazes</h1>
+    <>
+    <div id="header">
+      <a id="logo" href="https://www.github.com/zmertens/MazeBuilder"></a>
+
+      <span id='controls'>
+        <span><input type="button" id="btn-mouse" value="🐁 MOUSE"/></span>
+        <span><input type="button" value="🖵 FULLSCREEN" onClick={requestFullscreen}/></span>
+        <span><input type="button" id="btn-audio" value="🔇 MUTE" onClick={toggleAudio}/></span>
+      </span>
+
       <canvas
         id="canvas"
         width={windowWidth}
@@ -108,6 +132,7 @@ const MazeBuilderComponent = () => {
         Download Maze
       </button>
     </div>
+    </>
   );
 };
 
