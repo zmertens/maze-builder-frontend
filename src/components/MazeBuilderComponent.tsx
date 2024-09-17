@@ -1,122 +1,139 @@
-import { useEffect, useState } from 'react';
-
-import Module from '../maze_builder';
+import { useEffect, useState } from "react";
+import Module, { craft } from "../maze_builder";
 
 const MazeBuilderComponent = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [isModuleReady, setIsModuleReady] = useState(false);
-  const [mazeInfo, setMazeInfo] = useState(null);
+  const [mazeInfo, setMazeInfo] = useState<any | null>(null);
+  const [instance, setInstance] = useState<craft | null>(null);
 
-  async function initWASM() {
-    try {
-      let mazeBuilderModule = await Module();
-      let instance = new mazeBuilderModule.craft("Maze Builder", "Web", "NA");
-      if (!instance) {
-        console.error('Failed to create instance');
-      }
-      setIsModuleReady(true);
-      // Always clean up the instance
-      instance.delete();
-    } catch (error) {
-      console.error('Error creating instance:', error);
-    }
-  }
+  let intervalId = -1;
 
-  const pollForMazeData = async () => {
-    try {
-      let mazeBuilderModule = await Module();
-      let instance = new mazeBuilderModule.craft("Maze Builder", "Web", "NA");
-      if (!instance || !isModuleReady) {
-        console.error('Failed to create instance');
-        return;
-      }
-
-      // Polling for data readiness
-      const intervalId = setInterval(() => {
-        if (instance.is_json_rdy()) {
-          const mazeInfoStr = instance.get_json();
-          if (mazeInfoStr) {
-            const mazeInfo = JSON.parse(mazeInfoStr);
-            // Check if user creates a unique maze name
-            if (mazeInfo.name[0] !== '.') {
-              setMazeInfo(mazeInfo);
-              console.log('Maze data is ready:', mazeInfo.name);
-              console.log('Maze data:', mazeInfo.data);
-            }
+  const pollForMazeData = (mbi: craft) => {
+    // Polling for data readiness
+    intervalId = setInterval(() => {
+      
+      try {
+        const mazeInfoJson = mbi.get_json();
+        if (mazeInfoJson !== "") {
+          const mazeInfo = JSON.parse(mazeInfoJson);
+          // Check if user creates a unique maze name
+          if (mazeInfo && mazeInfo.name[0] !== ".") {
+            setMazeInfo(mazeInfo);
+            clearInterval(intervalId);
           }
-          instance.delete();
-        } // is_json_rdy
-        // Stop polling
-        clearInterval(intervalId);
-      }, 1000); // Check every 1 second
-    } catch (error) {
-      console.error('Error creating instance:', error);
-    }
-   }; // pollForMazeData
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    }, 1000); // Check every 1 second
+  }; // pollForMazeData
 
   useEffect(() => {
-    initWASM();
-    
-    pollForMazeData();
+    const loadModule = async () => {
+      const activeModule = await Module();
+      if (activeModule) {
+        let mbi = activeModule.craft.get_instance("Maze Builder", "", 0, 0);
+        if (mbi) {
+          setInstance(mbi);
+          pollForMazeData(mbi);
+        } else {
+          console.error("Failed to create instance");
+        }
+      }
+    };
+
+    loadModule();
 
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
 
-    // window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Cleanup function to remove the event listener
     return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-  }, []);
-
-  const handleDownloadClick = () => {
-    if (!isModuleReady) {
-      console.error('Module is not ready');
-      return;
-    }
-  
-    try {
-      let mazeBuilderModule = Module;
-      let instance = new mazeBuilderModule.craft("Maze Builder", "Web", "NA");
-      if (!instance) {
-        console.error('Failed to create instance');
-        return;
+      if (intervalId) {
+        clearInterval(intervalId);
       }
-  
-      const mazeInfoStr = instance.get_json();
-      const mazeInfo = JSON.parse(mazeInfoStr);
-      console.log("Maze Name:", mazeInfo.name);
-      console.log("Maze Data:", mazeInfo.data);
-      // setMazeInfo(mazeInfo);
-      // Proceed with creating a download button for the JSON
-      const dataStr = JSON.stringify(mazeInfo.data);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${mazeInfo.name}`;
-      document.body.appendChild(a);
-      a.click(); // Trigger download
-      document.body.removeChild(a); // Cleanup
-      URL.revokeObjectURL(url); // Free up memory
+      if (instance) {
+        console.log("Deleting instance");
+        instance.delete();
+        setInstance(null);
+      }
+      window.removeEventListener("resize", handleResize);
+    }
+  }, []); // useEffect
 
-      instance.delete();
+  const requestFullscreen = () => {
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    }
+  }; // requestFullscreen
+
+  const toggleAudio = () => {
+    const audioButton = document.getElementById("btn-audio") as HTMLInputElement;
+    if (audioButton.value === "🔊 UNMUTE") {
+      audioButton.value = "🔇 MUTE";
+    } else {
+      audioButton.value = "🔊 UNMUTE";
+    }
+  }; // toggleAudio
+
+  const handleDownloadClick = async () => {
+    try {
+      // Check before creating a download button for the JSON
+      if (mazeInfo !== null) {
+        const data = JSON.stringify(mazeInfo.data).split(",");
+        let dataCombined = "";
+        for (let i = 0; i < data.length; i++) {
+          dataCombined += data[i].replace(/\"|\]|\[/g, '') + "\n";
+        }
+        const blob = new Blob([dataCombined], { type: "application/text" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${mazeInfo.name}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setMazeInfo(null);
+        instance?.set_json("");
+        pollForMazeData(instance as craft);
+      };
     } catch (error) {
-      console.error('Error creating instance:', error);
+      console.error("Error creating instance:", error);
     }
   }; // handleDownloadClick
 
   return (
-      <div>
-        <h1> Build and Download Mazes</h1>
-        <canvas id="canvas" width={windowWidth} style={{ backgroundColor : 'blue'}} onContextMenu={ (event) => event.preventDefault() } />            
-        <br />
-        <button disabled={!isModuleReady || !mazeInfo} onClick={handleDownloadClick}>Download Maze</button>
-      </div>
-  );
+    <>
+    <div id="header">
+      <a id="logo" href="https://www.github.com/zmertens/MazeBuilder"></a>
 
+      <span id='controls'>
+        <span><input type="button" id="btn-mouse" value="🐁 MOUSE"/></span>
+        <span><input type="button" value="🖵 FULLSCREEN" onClick={requestFullscreen}/></span>
+        <span><input type="button" id="btn-audio" value="🔇 MUTE" onClick={toggleAudio}/></span>
+      </span>
+
+      <canvas
+        id="canvas"
+        width={windowWidth}
+        style={{ backgroundColor: "blue" }}
+        onContextMenu={(event) => event.preventDefault()}
+      />
+      <br />
+      <button
+        disabled={!mazeInfo}
+        onClick={handleDownloadClick}
+      >
+        Download Maze
+      </button>
+    </div>
+    </>
+  );
 };
 
 export default MazeBuilderComponent;

@@ -4,8 +4,6 @@
 
 Provides the Maze Builder application with a web interface.
 
-![mazebuilderweb](mazebuilderweb.png)
-
 Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml
 [[headers]]
@@ -19,19 +17,17 @@ Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.n
 
 JavaScript glue code and files are generated using [Emscripten](https://emscripten.org/index.html) and [https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake](https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake).
 
-There is a multi-step process to spin up the frontend with [Vite](https://vitejs.dev/):
-1. Generate JavaScript and WebAssembly files from MazeBuilder's C++ codebase. This is done with Emscripten and CMake.
-   - Please note that there are different performances and optimizations between the build configurations.
-2. Move these generated files from the C++ repo to this one:
+In order to spin up the frontend with [Vite](https://vitejs.dev/), the WebAssembly modules must be compiled:
+1. Generate JavaScript and WebAssembly files from [MazeBuilder's C++ codebase](https://github.com/zmertens/MazeBuilder). This is done with Emscripten and CMake.
+   - Please note that there are different performances and compiler optimizations between the Release and Debug build configurations.
+2. Move these generated files from the C++ repo to this repo:
      - `maze_builder.js` under `src/`
     - `maze_builder.wasm` under `src/`
     - `maze_builder.wasm.map` under `src/`
-    - `maze_builder.worker.js` under `src/`
-    - `maze_builder.worker.mjs` under `src/`
     - `maze_builder.data` under `/public`
     
 3. From the root of this repo, run `npm i` and then `npm run dev` , this will cause Vite to spin up a local server.
      - Open a browser with the specified port. For example, `localhost:5173`
 4. The application should be running in the browser - verify with Dev Tools and console output.
-
-Additionally, one can run a local Python server directly from MazeBuilder's C++ build repo using [secure_http_server.py](https://github.com/zmertens/MazeBuilder/blob/dev/secure_http_server.py) (**requires `index.html`**).
+     - An important note here, `npm run build` and `npm run preview` will generate a production mode server. There is a minor issue with the production distributables in that the DOM is included in the `dist/assets/index-*.js` file.
+     - I have been enclosing the DOM references with `if (typeof window !== 'undefined') { /* DOM references */ }`.
