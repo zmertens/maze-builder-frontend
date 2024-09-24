@@ -1,8 +1,9 @@
 /// <reference types="emscripten" />
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
-  set_json(string): void;
-  get_json(): string;
+  fullscreen(boolean): void;
+  mouse(boolean): void;
+  mazes(): string;
   delete(): void;
 }
 

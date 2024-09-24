@@ -1,0 +1,18 @@
+/* MazeBuilderComponent.css */
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .fullscreen-button,
+  .mouse-button,
+  .audio-button,
+  .canvas-container,
+  .download-button {
+    grid-column: span 1;
+  }
+  
+  .canvas-container {
+    grid-column: span 3;
+  }
