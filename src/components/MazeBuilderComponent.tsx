@@ -13,7 +13,7 @@ const MazeBuilderComponent = () => {
     intervalId = setInterval(() => {
       
       try {
-        const mazeInfoJson = mbi.get_json();
+        const mazeInfoJson = mbi.mazes();
         if (mazeInfoJson !== "") {
           const mazeInfo = JSON.parse(mazeInfoJson);
           // Check if user creates a unique maze name
