@@ -8,11 +8,9 @@ const MazeBuilderComponent = () => {
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
 
-  let intervalId: NodeJS.Timeout;
-
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
-    intervalId = setInterval(() => {
+    let intervalId = setInterval(() => {
       try {
         const mazeInfoJson = mbi.mazes();
         if (mazeInfoJson !== "") {
@@ -61,9 +59,6 @@ const MazeBuilderComponent = () => {
 
     // Cleanup function to remove the event listener
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
       if (instance) {
         console.log("Deleting instance");
         instance.delete();
