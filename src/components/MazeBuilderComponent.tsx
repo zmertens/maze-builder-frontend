@@ -6,7 +6,7 @@ const MazeBuilderComponent = () => {
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
 
-  let intervalId = -1;
+  let intervalId: NodeJS.Timeout;
 
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
