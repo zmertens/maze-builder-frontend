@@ -1,6 +1,8 @@
 /// <reference types="emscripten" />
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
+  fullscreen(boolean): void;
+  mouse(boolean): void;
   mazes(): string;
   delete(): void;
 }
