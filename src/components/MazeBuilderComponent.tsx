@@ -86,8 +86,8 @@ const MazeBuilderComponent = () => {
     setIsMouseCaptured(!isMouseCaptured);
     instance?.mouse(isMouseCaptured);
     const mouseBtn = document.getElementById("mouseBtn") as HTMLInputElement;
-    if (isMouseCaptured) mouseBtn.value = "🐁 MOUSE";
-    else mouseBtn.value = "🔒 MOUSE";
+    if (mouseBtn.value === "🐁 MOUSE") mouseBtn.value = "🔒 MOUSE";
+    else mouseBtn.value = "🐁 MOUSE";
   };
 
   const handleDownloadClick = async () => {
