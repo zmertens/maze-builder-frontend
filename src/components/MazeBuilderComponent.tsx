@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Module, { craft } from "../maze_builder";
 import "./MazeBuilderComponent.css";
 
 const MazeBuilderComponent = () => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMouseCaptured, setIsMouseCaptured] = useState(false);
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
@@ -43,53 +43,46 @@ const MazeBuilderComponent = () => {
 
     loadModule();
 
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const handleResize = () => {
-      const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          const { width } = entry.contentRect;
-          setWindowWidth(width);
-          canvas.width = width;
-        }
-      });
-      resizeObserver.observe(canvas);
+      const container = canvas.parentElement;
+      if (!container) return;
+      const { width, height } = container.getBoundingClientRect();
+      canvas.width = width;
+      canvas.height = height;
     };
-    window.addEventListener("load", handleResize);
-    window.addEventListener("resize", handleResize);
+    
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(canvas);
+    
+    flipMouse();
+    handleResize();
 
     // Cleanup function to remove the event listener
     return () => {
       if (instance) {
+        resizeObserver.disconnect();
         console.log("Deleting instance");
         instance.delete();
         setInstance(null);
       }
-      window.removeEventListener("resize", handleResize);
+    
     };
   }, []); // useEffect
 
   const requestFullscreen = () => {
-    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    if (canvas.requestFullscreen) {
+    const canvas = canvasRef.current;
+    if (canvas && canvas.requestFullscreen) {
       canvas.requestFullscreen();
       instance?.fullscreen(true);
     }
   }; // requestFullscreen
 
-  const toggleAudio = () => {
-    const audioButton = document.getElementById(
-      "btn-audio"
-    ) as HTMLInputElement;
-    if (audioButton.value === "🔊 UNMUTE") {
-      audioButton.value = "🔇 MUTE";
-    } else {
-      audioButton.value = "🔊 UNMUTE";
-    }
-  }; // toggleAudio
-
   const flipMouse = () => {
-    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.style.cursor = "pointer";
     setIsMouseCaptured(!isMouseCaptured);
     instance?.mouse(isMouseCaptured);
     const mouseBtn = document.getElementById("mouseBtn") as HTMLInputElement;
@@ -126,39 +119,35 @@ const MazeBuilderComponent = () => {
   return (
     <>
       <div className="container">
-        <span className="fullscreen-button">
-          <input
-            type="button"
-            value="🖵 FULLSCREEN"
-            onClick={requestFullscreen}
-          />
-        </span>
-        <span className="mouse-button">
-          <input
-            id="mouseBtn"
-            type="button"
-            onClick={flipMouse}
-          />
-        </span>
-        <span className="audio-button">
-          <input
-            type="button"
-            id="btn-audio"
-            value="🔇 MUTE"
-            onClick={toggleAudio}
-          />
-        </span>
-        <span className="download-button">
-          <input type="button" disabled={!mazeInfo} onClick={handleDownloadClick} value="🚀 DOWNLOAD"/>
-        </span>
+        <div className="banner">
+          <span className="span-button">
+            <input
+              type="button"
+              value="🖵 FULLSCREEN"
+              onClick={requestFullscreen}
+            />
+          </span>
+          <span className="span-button">
+            <input id="mouseBtn" type="button" value="🐁 MOUSE" onClick={flipMouse} />
+          </span>
+          <span className="span-button">
+            <input
+              type="button"
+              disabled={!mazeInfo}
+              onClick={handleDownloadClick}
+              value="🚀 DOWNLOAD"
+            />
+          </span>
+        </div>
         <span className="canvas-container">
-          <canvas
-            id="canvas"
-            width={windowWidth}
-            style={{ backgroundColor: "blue" }}
-            onContextMenu={(event) => event.preventDefault()}
-          />
-        </span>
+            <canvas
+              id="canvas"
+              className="canvas"
+              ref={canvasRef}
+              style={{ backgroundColor: "blue" }}
+              onContextMenu={(event) => event.preventDefault()}
+            />
+          </span>
       </div>
     </>
   );
