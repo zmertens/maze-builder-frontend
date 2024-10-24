@@ -1,24 +1,31 @@
-import { useEffect, useState, useRef } from "react";
-import Module, { craft } from "../maze_builder";
-import "./MazeBuilderComponent.css";
+import { useEffect, useState } from "react";
+import Module, { craft } from "../voxels";
 
 const MazeBuilderComponent = () => {
-  const [isMouseCaptured, setIsMouseCaptured] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  let intervalId = -1;
 
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
-    let intervalId = setInterval(() => {
+    intervalId = setInterval(async () => {
+      
       try {
-        const mazeInfoJson = mbi.mazes();
-        if (mazeInfoJson !== "") {
-          const mazeInfo = JSON.parse(mazeInfoJson);
-          // Check if user creates a unique maze name
-          if (mazeInfo && mazeInfo.name[0] !== ".") {
-            setMazeInfo(mazeInfo);
-            clearInterval(intervalId);
+        if (mbi) {
+          const mazeInfoJson = await mbi.mazes();
+          if (mazeInfoJson !== "") {
+            const mazeInfo = JSON.parse(mazeInfoJson);
+            // Check if user creates a unique maze name
+            if (mazeInfo) {
+              setMazeInfo(mazeInfo);
+              clearInterval(intervalId);
+            }
           }
         }
       } catch (error) {
@@ -28,10 +35,12 @@ const MazeBuilderComponent = () => {
   }; // pollForMazeData
 
   useEffect(() => {
+    const canvas = document.querySelector('canvas.emscripten');
+
     const loadModule = async () => {
       const activeModule = await Module();
       if (activeModule) {
-        let mbi = activeModule.craft.get_instance("Maze Builder", "", 0, 0);
+        let mbi = activeModule.craft.get_instance("Maze Builder", "", 800, 600);
         if (mbi) {
           setInstance(mbi);
           pollForMazeData(mbi);
@@ -43,24 +52,20 @@ const MazeBuilderComponent = () => {
 
     loadModule();
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleResize = () => {
-      const container = canvas.parentElement;
-      if (!container) return;
-      const { width, height } = container.getBoundingClientRect();
-      canvas.width = width;
-      canvas.height = height;
-    };
-    
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (canvas) {
+        for (let entry of entries) {
+          if (entry.target === document.documentElement) {
+            setWindowSize({
+              width: window.innerWidth,
+              height: window.innerHeight,
+            });
+          }
+        }
+      }
     });
-    resizeObserver.observe(canvas);
-    
-    flipMouse();
-    handleResize();
+
+    resizeObserver.observe(document.documentElement);
 
     // Cleanup function to remove the event listener
     return () => {
@@ -70,40 +75,20 @@ const MazeBuilderComponent = () => {
         instance.delete();
         setInstance(null);
       }
-    
-    };
-  }, []); // useEffect
-
-  const requestFullscreen = () => {
-    const canvas = canvasRef.current;
-    if (canvas && canvas.requestFullscreen) {
-      canvas.requestFullscreen();
-      instance?.fullscreen(true);
+      resizeObserver.unobserve(document.documentElement);
     }
-  }; // requestFullscreen
-
-  const flipMouse = () => {
-    setIsMouseCaptured(!isMouseCaptured);
-    instance?.mouse(isMouseCaptured);
-    const mouseBtn = document.getElementById("mouseBtn") as HTMLInputElement;
-    if (mouseBtn.value === "🐁 MOUSE") mouseBtn.value = "🔒 MOUSE";
-    else mouseBtn.value = "🐁 MOUSE";
-  };
+  }, []); // useEffect
 
   const handleDownloadClick = async () => {
     try {
       // Check before creating a download button for the JSON
       if (mazeInfo !== null) {
-        const data = JSON.stringify(mazeInfo.data).split(",");
-        let dataCombined = "";
-        for (let i = 0; i < data.length; i++) {
-          dataCombined += data[i].replace(/\"|\]|\[/g, "") + "\n";
-        }
-        const blob = new Blob([dataCombined], { type: "application/text" });
+        const data = JSON.stringify(atob(mazeInfo.output));
+        const blob = new Blob([data], { type: "application/text" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${mazeInfo.name}`;
+        a.download = `${mazeInfo.seed}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -118,37 +103,15 @@ const MazeBuilderComponent = () => {
 
   return (
     <>
-      <div className="container">
-        <div className="banner">
-          <span className="span-button">
-            <input
-              type="button"
-              value="🖵 FULLSCREEN"
-              onClick={requestFullscreen}
-            />
-          </span>
-          <span className="span-button">
-            <input id="mouseBtn" type="button" value="🐁 MOUSE" onClick={flipMouse} />
-          </span>
-          <span className="span-button">
-            <input
-              type="button"
-              disabled={!mazeInfo}
-              onClick={handleDownloadClick}
-              value="🚀 DOWNLOAD"
-            />
-          </span>
-        </div>
-        <span className="canvas-container">
-            <canvas
-              id="canvas"
-              className="canvas"
-              ref={canvasRef}
-              style={{ backgroundColor: "blue" }}
-              onContextMenu={(event) => event.preventDefault()}
-            />
-          </span>
-      </div>
+    <div>
+      <span>
+        <canvas id="canvas" width={windowSize.width} height={windowSize.height} />
+      </span>
+      <br />
+      <span className="span-button">
+        <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
+      </span>
+    </div>
     </>
   );
 };
