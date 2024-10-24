@@ -9,8 +9,7 @@ const MazeBuilderComponent = () => {
 
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
-
-  let intervalId = -1;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
@@ -52,6 +51,9 @@ const MazeBuilderComponent = () => {
 
     loadModule();
 
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const resizeObserver = new ResizeObserver((entries) => {
       if (canvas) {
         for (let entry of entries) {
@@ -69,10 +71,8 @@ const MazeBuilderComponent = () => {
 
     // Cleanup function to remove the event listener
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
       if (instance) {
+        resizeObserver.disconnect();
         console.log("Deleting instance");
         instance.delete();
         setInstance(null);
@@ -97,7 +97,7 @@ const MazeBuilderComponent = () => {
         URL.revokeObjectURL(url);
         setMazeInfo(null);
         pollForMazeData(instance as craft);
-      };
+      }
     } catch (error) {
       console.error("Error creating instance:", error);
     }

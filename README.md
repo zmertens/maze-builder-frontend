@@ -4,7 +4,9 @@
 
 Provides the Maze Builder application with a web interface.
 
-Deployed on [Netlify](https://668145265561420d1369a177--jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
+![web app](webapp1.jpg)
+
+Deployed on [Netlify](https://jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml
 [[headers]]
   for = "/*"
@@ -28,6 +30,3 @@ In order to spin up the frontend with [Vite](https://vitejs.dev/), the WebAssemb
     
 3. From the root of this repo, run `npm i` and then `npm run dev` , this will cause Vite to spin up a local server.
      - Open a browser with the specified port. For example, `localhost:5173`
-4. The application should be running in the browser - verify with Dev Tools and console output.
-     - An important note here, `npm run build` and `npm run preview` will generate a production mode server. There is a minor issue with the production distributables in that the DOM is included in the `dist/assets/index-*.js` file.
-     - I have been enclosing the DOM references with `if (typeof window !== 'undefined') { /* DOM references */ }`.

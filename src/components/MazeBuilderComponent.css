@@ -1,0 +1,31 @@
+/* MazeBuilderComponent.css */
+.container {
+    display: grid;
+    /* grid-template-columns: repeat(3, 1fr); */
+    grid-template-rows: 15% 85%;
+    height: 100vh
+  }
+  
+.banner {
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+}
+
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e9ecef;
+}
+
+.canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.span-button {
+    display: flex;
+}
