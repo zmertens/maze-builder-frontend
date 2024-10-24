@@ -2,9 +2,9 @@
 
 # maze-builder-frontend
 
-Provides the Maze Builder application with a web interface.
+Provides the [Maze Builder](https://www.github.com/zmertens/MazeBuilder) application with a web interface.
 
-![web app](webapp1.jpg)
+![web app](webapp2.jpg)
 
 Deployed on [Netlify](https://jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
 ```toml

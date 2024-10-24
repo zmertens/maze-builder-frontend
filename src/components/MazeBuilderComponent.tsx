@@ -108,12 +108,9 @@ const MazeBuilderComponent = () => {
         <canvas id="canvas" width={windowSize.width} height={windowSize.height} />
       </span>
       <br />
-      <button
-        disabled={!mazeInfo}
-        onClick={handleDownloadClick}
-      >
-        Download Maze
-      </button>
+      <span className="span-button">
+        <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
+      </span>
     </div>
     </>
   );
