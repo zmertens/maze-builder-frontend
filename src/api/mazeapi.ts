@@ -1,5 +1,5 @@
 
-const API_URL = "http://localhost:8080";
+// const API_URL = "http://localhost:8080";
 
 // export const getMazes = async (): Promise<MazeResponse[]> => {
 //   const response = await axios.get(`${API_URL}/api/mazes`);

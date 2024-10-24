@@ -9,7 +9,8 @@ const MazeBuilderComponent = () => {
 
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [instance, setInstance] = useState<craft | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  let intervalId = -1;
 
   const pollForMazeData = (mbi: craft) => {
     // Polling for data readiness
@@ -50,9 +51,6 @@ const MazeBuilderComponent = () => {
     };
 
     loadModule();
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       if (canvas) {
