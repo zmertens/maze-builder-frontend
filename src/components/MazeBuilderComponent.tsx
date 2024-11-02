@@ -105,16 +105,24 @@ const MazeBuilderComponent = () => {
     }
   }; // handleDownloadClick
 
+  const toggleMouse = () => {
+    instance?.toggle_mouse();
+  }
+
   return (
     <>
     <div>
       <span>
         <canvas id="canvas" width={windowSize.width} height={windowSize.height} />
       </span>
-      <br />
-      <span className="span-button">
-        <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
-      </span>
+      <div className="button-container">
+          <span className="span-button">
+            <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
+          </span>
+          <span className="span-button">
+            <input type="button" value="🐁 Toggle" onClick={toggleMouse} />
+          </span>
+      </div>
     </div>
     </>
   );

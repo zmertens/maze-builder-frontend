@@ -2,6 +2,7 @@
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
   mazes(): string;
+  toggle_mouse(): void;
   delete(): void;
 }
 
