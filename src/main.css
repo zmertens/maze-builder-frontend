@@ -3,16 +3,11 @@ body {
   padding: none;
 }
 
-.emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-div.emscripten { text-align: center; }
-div.emscripten_border { border: 1px solid black; }
+.emscripten { position: relative; }
 
-/* NOTE: Canvas *must not* have any border or padding, or mouse coords will be wrong */
-canvas.emscripten {
-  border: 0px none;
-  background: black;
+#canvas {
   width: 100%;
-  height: 100%;
+  height: 90vh;
 }
 
 @-webkit-keyframes rotation {
@@ -41,6 +36,15 @@ input[type=button] {
   width: 140px;
   height: 50px;
   margin-left: 10px;
+  position: absolute;
+  z-index: 10;
+}
+
+input[type=button]:disabled {
+  background-color: lightgray;
+  border: 4px solid gray;
+  color: black;
+  cursor: not-allowed;
 }
 
 input[type=button]:hover {

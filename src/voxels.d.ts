@@ -10,10 +10,10 @@ interface MazeBuilderModule extends EmscriptenModule {
 }
 
 export type MazeResponse = {
-  file: string;
+  obj64: string;
   algorithm: string;
-  width: number;
-  length: number;
+  num_rows: number;
+  num_cols: number;
   height: number;
   seed: number;
   _links: {
@@ -27,11 +27,11 @@ export type MazeResponse = {
 };
 
 export type Maze = {
-  output: string;
+  obj64: string;
   algorithm: string;
   num_rows: number;
   num_cols: number;
-  depth: number;
+  height: number;
   seed: number;
 };
 
