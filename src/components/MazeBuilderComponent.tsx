@@ -8,28 +8,28 @@ const MazeBuilderComponent = () => {
   });
 
   const [mazeInfo, setMazeInfo] = useState<any | null>(null);
+  const [lastJSONSize, setLastJSONSize] = useState<number>(0);
   const [instance, setInstance] = useState<craft | null>(null);
 
   let intervalId = -1;
 
+  // Poll for maze data periodically, look only for last-generated maze
   const pollForMazeData = (mbi: craft) => {
-    // Polling for data readiness
     intervalId = setInterval(async () => {
-      
       try {
         if (mbi) {
           const mazeInfoJson = await mbi.mazes();
-          if (mazeInfoJson !== "") {
+          // Check if the JSON has changed, if so, update the state
+          if (mazeInfoJson.length > 0 && mazeInfoJson.length !== lastJSONSize) {
+            setLastJSONSize(mazeInfoJson.length);
             const mazeInfo = JSON.parse(mazeInfoJson);
-            // Check if user creates a unique maze name
-            if (mazeInfo) {
-              setMazeInfo(mazeInfo);
-              clearInterval(intervalId);
-            }
+            setMazeInfo(mazeInfo);
+            clearInterval(intervalId);
           }
         }
       } catch (error) {
         console.error("Error parsing JSON:", error);
+        clearInterval(intervalId);
       }
     }, 1000); // Check every 1 second
   }; // pollForMazeData
@@ -83,16 +83,20 @@ const MazeBuilderComponent = () => {
     try {
       // Check before creating a download button for the JSON
       if (mazeInfo !== null) {
-        const data = JSON.stringify(atob(mazeInfo.output));
+        const data = atob(mazeInfo.obj64);
         const blob = new Blob([data], { type: "application/text" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${mazeInfo.seed}.txt`;
+        a.download = `${mazeInfo.algo}_${mazeInfo.seed}.obj`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+
+        // Reset polling state
+        const btn = document.querySelector('input[type=button]');
+        btn?.setAttribute('disabled', 'true');
         setMazeInfo(null);
         pollForMazeData(instance as craft);
       }
@@ -101,16 +105,24 @@ const MazeBuilderComponent = () => {
     }
   }; // handleDownloadClick
 
+  const toggleMouse = () => {
+    instance?.toggle_mouse();
+  }
+
   return (
     <>
     <div>
       <span>
         <canvas id="canvas" width={windowSize.width} height={windowSize.height} />
       </span>
-      <br />
-      <span className="span-button">
-        <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
-      </span>
+      <div className="button-container">
+          <span className="span-button">
+            <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
+          </span>
+          <span className="span-button">
+            <input type="button" value="🐁 Toggle" onClick={toggleMouse} />
+          </span>
+      </div>
     </div>
     </>
   );
