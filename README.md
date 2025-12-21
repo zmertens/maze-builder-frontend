@@ -4,29 +4,9 @@
 
 Provides the [Maze Builder](https://www.github.com/zmertens/MazeBuilder) application with a web interface.
 
-![web app](webapp2.jpg)
-
-Deployed on [Netlify](https://jade-semifreddo-f24ef0.netlify.app/) - distributed securely using `netlify.toml`:
-```toml
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cross-Origin-Opener-Policy = "same-origin"
-    Cross-Origin-Embedder-Policy = "require-corp"
-```
 
 ## Build and Run
 
-JavaScript glue code and files are generated using [Emscripten](https://emscripten.org/index.html) and [https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake](https://github.com/zmertens/MazeBuilder?tab=readme-ov-file#cmake).
+`npm i` and `npm run dev` or `npm run preview` to get things going.
 
-In order to spin up the frontend with [Vite](https://vitejs.dev/), the WebAssembly modules must be compiled:
-1. Generate JavaScript and WebAssembly files from [MazeBuilder's C++ codebase](https://github.com/zmertens/MazeBuilder). This is done with Emscripten and CMake.
-   - Please note that there are different performances and compiler optimizations between the Release and Debug build configurations.
-2. Move these generated files from the C++ repo to this repo:
-     - `voxels.js` under `src/`
-    - `voxels.wasm` under `src/`
-    - `voxels.wasm.map` under `src/`
-    - `voxels.data` under `/public`
-    
-3. From the root of this repo, run `npm i` and then `npm run dev` , this will cause Vite to spin up a local server.
-     - Open a browser with the specified port. For example, `localhost:5173`
+

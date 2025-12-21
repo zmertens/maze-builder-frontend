@@ -1,13 +1,13 @@
 /// <reference types="emscripten" />
 // https://ecolingui.ca/en/blog/emguide-3/
 export declare class craft {
-  mazes(): string;
-  toggle_mouse(): void;
-  delete(): void;
+  artifacts(): string;
+  is_download_ready(): boolean;
+  set_download_ready(ready: boolean): void;
 }
 
 interface MazeBuilderModule extends EmscriptenModule {
-  get_instance: (v: string, h: string, w: number, h: number) => craft;
+  get: () => craft;
 }
 
 export type MazeResponse = {
