@@ -8,7 +8,6 @@ const MazeBuilderComponent = () => {
   });
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [lastJSONSize, setLastJSONSize] = useState<number>(0);
   const [instance, setInstance] = useState<craft | null>(null);
 
@@ -130,12 +129,6 @@ const MazeBuilderComponent = () => {
       resizeObserver.unobserve(document.documentElement);
     };
   }, []); // useEffect
-
-  const handleDownloadClick = async () => {}; // handleDownloadClick
-
-  const toggle_download_ready = () => {
-    instance?.set_download_ready(!instance.is_download_ready());
-  };
 
   return (
     <>
