@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import Module, { craft } from "../voxels";
+import { useEffect, useRef, useState } from "react";
+import Module, { craft } from "../mazebuildervoxels";
 
 const MazeBuilderComponent = () => {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [mazeInfo, setMazeInfo] = useState<any | null>(null);
   const [lastJSONSize, setLastJSONSize] = useState<number>(0);
   const [instance, setInstance] = useState<craft | null>(null);
 
@@ -18,12 +18,39 @@ const MazeBuilderComponent = () => {
     intervalId = setInterval(async () => {
       try {
         if (mbi) {
-          const mazeInfoJson = await mbi.mazes();
-          // Check if the JSON has changed, if so, update the state
+          const downloadReady = await mbi.is_download_ready();
+          if (downloadReady === false) {
+            return;
+          }
+          const mazeInfoJson = await mbi.artifacts();
           if (mazeInfoJson.length > 0 && mazeInfoJson.length !== lastJSONSize) {
             setLastJSONSize(mazeInfoJson.length);
-            const mazeInfo = JSON.parse(mazeInfoJson);
-            setMazeInfo(mazeInfo);
+            // const mazeInfo = JSON.parse(mazeInfoJson);
+            // setMazeInfo(mazeInfo);
+
+            // Create a blob from the artifacts string
+            const blob = new Blob([mazeInfoJson], { type: "text/plain" });
+
+            // Create a download link and trigger download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download =
+              "artifacts_" +
+              new Date().toISOString().replace(/[:.]/g, "-") +
+              ".obj";
+            document.body.appendChild(a);
+            a.click();
+
+            // Cleanup
+            setTimeout(() => {
+              mbi.set_download_ready(false);
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              Module.print("Artifacts downloaded successfully!");
+              console.log("Download triggered, cleanup complete");
+            }, 100);
+
             clearInterval(intervalId);
           }
         }
@@ -35,32 +62,57 @@ const MazeBuilderComponent = () => {
   }; // pollForMazeData
 
   useEffect(() => {
-    const canvas = document.querySelector('canvas.emscripten');
-
     const loadModule = async () => {
-      const activeModule = await Module();
-      if (activeModule) {
-        let mbi = activeModule.craft.get_instance("Maze Builder", "", 800, 600);
-        if (mbi) {
-          setInstance(mbi);
-          pollForMazeData(mbi);
+      try {
+        // Assign the canvas to the global Module object before loading WASM
+
+        if (canvasRef.current) {
+          const c = canvasRef.current;
+          console.log(
+            `Canvas ref set. Dimensions: width=${c.width}, height=${c.height}, clientWidth=${c.clientWidth}, clientHeight=${c.clientHeight}`
+          );
+          // @ts-ignore
+          window.Module = { canvas: c };
         } else {
-          console.error("Failed to create instance");
+          console.error(
+            "Canvas ref is not set. Canvas element may not be mounted yet."
+          );
         }
+
+        console.log("Loading WASM module...");
+        const activeModule = await Module();
+        console.log("WASM module loaded:", activeModule);
+        if (activeModule) {
+          let mbi = null;
+          try {
+            mbi = await activeModule.get();
+            console.log("Module.get() returned:", mbi);
+          } catch (e) {
+            console.error("Error calling activeModule.get():", e);
+          }
+          if (mbi) {
+            setInstance(mbi);
+            pollForMazeData(mbi);
+          } else {
+            console.error("Failed to create instance from activeModule.get()");
+          }
+        } else {
+          console.error("Module() did not return an active module");
+        }
+      } catch (err) {
+        console.error("Error loading WASM module:", err);
       }
     };
 
     loadModule();
 
     const resizeObserver = new ResizeObserver((entries) => {
-      if (canvas) {
-        for (let entry of entries) {
-          if (entry.target === document.documentElement) {
-            setWindowSize({
-              width: window.innerWidth,
-              height: window.innerHeight,
-            });
-          }
+      for (let entry of entries) {
+        if (entry.target === document.documentElement) {
+          setWindowSize({
+            width: window.innerWidth,
+            height: window.innerHeight,
+          });
         }
       }
     });
@@ -72,58 +124,25 @@ const MazeBuilderComponent = () => {
       if (instance) {
         resizeObserver.disconnect();
         console.log("Deleting instance");
-        instance.delete();
         setInstance(null);
       }
       resizeObserver.unobserve(document.documentElement);
-    }
+    };
   }, []); // useEffect
-
-  const handleDownloadClick = async () => {
-    try {
-      // Check before creating a download button for the JSON
-      if (mazeInfo !== null) {
-        const data = atob(mazeInfo.obj64);
-        const blob = new Blob([data], { type: "application/text" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${mazeInfo.algo}_${mazeInfo.seed}.obj`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        // Reset polling state
-        const btn = document.querySelector('input[type=button]');
-        btn?.setAttribute('disabled', 'true');
-        setMazeInfo(null);
-        pollForMazeData(instance as craft);
-      }
-    } catch (error) {
-      console.error("Error creating instance:", error);
-    }
-  }; // handleDownloadClick
-
-  const toggleMouse = () => {
-    instance?.toggle_mouse();
-  }
 
   return (
     <>
-    <div>
-      <span>
-        <canvas id="canvas" width={windowSize.width} height={windowSize.height} />
-      </span>
-      <div className="button-container">
-          <span className="span-button">
-            <input type="button" value="🚀 Download" disabled={!mazeInfo} onClick={handleDownloadClick} />
-          </span>
-          <span className="span-button">
-            <input type="button" value="🐁 Toggle" onClick={toggleMouse} />
-          </span>
+      <div>
+        <span>
+          <canvas
+            id="canvas"
+            className="emscripten"
+            ref={canvasRef}
+            width={windowSize.width}
+            height={windowSize.height}
+          />
+        </span>
       </div>
-    </div>
     </>
   );
 };
