@@ -3,7 +3,7 @@
 export declare class craft {
   artifacts(): string;
   is_download_ready(): boolean;
-  set_download_ready(ready: boolean): void;
+  reset_download_flag(): void;
 }
 
 interface MazeBuilderModule extends EmscriptenModule {
