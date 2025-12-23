@@ -44,7 +44,7 @@ const MazeBuilderComponent = () => {
 
             // Cleanup
             setTimeout(() => {
-              mbi.set_download_ready(false);
+              mbi.reset_download_flag();
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
               Module.print("Artifacts downloaded successfully!");
