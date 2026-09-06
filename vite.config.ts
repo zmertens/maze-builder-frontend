@@ -6,10 +6,7 @@ import tla from 'rollup-plugin-tla';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      // Disable fast refresh for better rendering performance with WASM
-      fastRefresh: false,
-    }),
+    react(),
   ],
   test: {
     globals: true,
