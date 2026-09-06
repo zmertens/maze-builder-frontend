@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 // @ts-ignore - Emscripten factory function with adjacent .d.ts
 import ModuleFactory from "../Breaking_Walls_App";
 
@@ -13,6 +13,7 @@ interface craft {
   set_maze_columns(cols: number): void;
   set_maze_algo(algo: string): void;
   set_maze_seed(seed: number): void;
+  delete?(): void;
 }
 
 interface MainModule {
@@ -27,18 +28,21 @@ interface ModuleConfig {
 }
 
 const MazeBuilderComponent = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const verboseWasmLogs = false;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const [instance, setInstance] = useState<craft | null>(null);
-  const [exportStatus, setExportStatus] = useState<string>("idle");
-
-  let intervalId = -1;
+  const instanceRef = useRef<craft | null>(null);
+  const intervalIdRef = useRef<number | null>(null);
+  const exportStatusRef = useRef<string>("idle");
 
   useEffect(() => {
+    let isUnmounted = false;
+
+    const setExportStatus = (next: string) => {
+      if (exportStatusRef.current !== next) {
+        exportStatusRef.current = next;
+      }
+    };
+
     const loadModule = async () => {
       try {
         if (!canvasRef.current) {
@@ -53,11 +57,19 @@ const MazeBuilderComponent = () => {
           `Canvas ref set. Dimensions: width=${c.width}, height=${c.height}, clientWidth=${c.clientWidth}, clientHeight=${c.clientHeight}`
         );
 
+        // Set canvas size to match window dimensions once
+        // This should NOT be reactive to window resize to avoid disrupting WebGL context
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+
         // Define initialization function before creating ModuleConfig
         let activeModule: MainModule | null = null;
 
         const initializeEngine = () => {
           try {
+            if (isUnmounted) {
+              return;
+            }
             if (!activeModule) {
               console.error(
                 "Active module is not initialized"
@@ -75,80 +87,94 @@ const MazeBuilderComponent = () => {
             console.log("[WASM] Engine instance acquired:", mbi);
             console.log("[WASM] Engine version:", mbi.get_version?.());
 
-            setInstance(mbi);
+            instanceRef.current = mbi;
 
             // Expose export trigger globally so UI can trigger exports
             // @ts-ignore
             window.triggerExport = (opts?: { rows?: number; cols?: number; algo?: string; seed?: number }) => {
-              if (mbi) {
-                opts = opts || {};
-                if (opts.rows != null) mbi.set_maze_rows(opts.rows | 0);
-                if (opts.cols != null)
-                  mbi.set_maze_columns(opts.cols | 0);
-                if (opts.algo != null) mbi.set_maze_algo(String(opts.algo));
-                if (opts.seed != null) mbi.set_maze_seed(opts.seed | 0);
-
-                setExportStatus("running");
-                mbi.begin_export();
-
-                let pollCount = 0;
-                intervalId = window.setInterval(() => {
-                  pollCount++;
-                  try {
-                    if (!mbi.is_export_ready()) {
-                      if (pollCount % 4 === 0) {
-                        const status = mbi.get_export_status();
-                        console.log(
-                          `[WASM] Export in progress... (${status})`
-                        );
-                        setExportStatus(status);
-                      }
-                      return;
-                    }
-
-                    clearInterval(intervalId);
-                    const mazeObjData = mbi.get_export();
-
-                    if (!mazeObjData || mazeObjData.length === 0) {
-                      console.warn(
-                        "[WASM] Export produced empty OBJ data"
-                      );
-                      setExportStatus("idle");
-                      return;
-                    }
-
-                    console.log(
-                      `[WASM] Export ready: ${mazeObjData.length} bytes`
-                    );
-                    setExportStatus("ready");
-
-                    // Trigger download
-                    const blob = new Blob([mazeObjData], {
-                      type: "text/plain",
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download =
-                      "maze_" +
-                      new Date().toISOString().replace(/[:.]/g, "-") +
-                      ".obj";
-                    document.body.appendChild(a);
-                    a.click();
-
-                    setTimeout(() => {
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                      console.log("[WASM] Maze downloaded successfully");
-                      setExportStatus("idle");
-                    }, 100);
-                  } catch (err) {
-                    clearInterval(intervalId);
-                    console.error("[WASM] Export poll error:", err);
-                    setExportStatus("error");
-                  }
-                }, 250); // Poll every 250ms like the HTML version
+              if (!mbi || isUnmounted) {
+                return;
               }
+
+              opts = opts || {};
+              if (opts.rows != null) mbi.set_maze_rows(opts.rows | 0);
+              if (opts.cols != null)
+                mbi.set_maze_columns(opts.cols | 0);
+              if (opts.algo != null) mbi.set_maze_algo(String(opts.algo));
+              if (opts.seed != null) mbi.set_maze_seed(opts.seed | 0);
+
+              if (intervalIdRef.current != null) {
+                clearInterval(intervalIdRef.current);
+                intervalIdRef.current = null;
+              }
+
+              setExportStatus("running");
+              mbi.begin_export();
+
+              let pollCount = 0;
+              intervalIdRef.current = window.setInterval(() => {
+                pollCount++;
+                try {
+                  if (!mbi.is_export_ready()) {
+                    if (pollCount % 4 === 0) {
+                      const status = mbi.get_export_status();
+                      console.log(
+                        `[WASM] Export in progress... (${status})`
+                      );
+                      setExportStatus(status);
+                    }
+                    return;
+                  }
+
+                  if (intervalIdRef.current != null) {
+                    clearInterval(intervalIdRef.current);
+                    intervalIdRef.current = null;
+                  }
+
+                  const mazeObjData = mbi.get_export();
+
+                  if (!mazeObjData || mazeObjData.length === 0) {
+                    console.warn(
+                      "[WASM] Export produced empty OBJ data"
+                    );
+                    setExportStatus("idle");
+                    return;
+                  }
+
+                  console.log(
+                    `[WASM] Export ready: ${mazeObjData.length} bytes`
+                  );
+                  setExportStatus("ready");
+
+                  // Trigger download
+                  const blob = new Blob([mazeObjData], {
+                    type: "text/plain",
+                  });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download =
+                    "maze_" +
+                    new Date().toISOString().replace(/[:.]/g, "-") +
+                    ".obj";
+                  document.body.appendChild(a);
+                  a.click();
+
+                  setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    console.log("[WASM] Maze downloaded successfully");
+                    setExportStatus("idle");
+                  }, 100);
+                } catch (err) {
+                  if (intervalIdRef.current != null) {
+                    clearInterval(intervalIdRef.current);
+                    intervalIdRef.current = null;
+                  }
+                  console.error("[WASM] Export poll error:", err);
+                  setExportStatus("error");
+                }
+              }, 250); // Poll every 250ms like the HTML version
             };
           } catch (err) {
             console.error("[WASM] Engine initialization error:", err);
@@ -157,12 +183,14 @@ const MazeBuilderComponent = () => {
 
         // Create the Module configuration object after initializeEngine is defined
         // @ts-ignore - requestFullscreen is set by Emscripten/SDL3 at runtime
-        const ModuleConfig: any = {
+        const moduleConfig: ModuleConfig = {
           // Ensure SDL can safely override this hook during runtime init
           requestFullscreen: undefined,
           canvas: c,
           print: (...args: any[]) => {
-            console.log("[WASM]", ...args);
+            if (verboseWasmLogs) {
+              console.log("[WASM]", ...args);
+            }
           },
           onRuntimeInitialized: () => {
             console.log("[WASM] Runtime initialized");
@@ -172,7 +200,15 @@ const MazeBuilderComponent = () => {
 
         // Call the Emscripten factory function with pre-configured Module object
         console.log("Loading WASM module...");
-        activeModule = await ModuleFactory(ModuleConfig);
+        activeModule = await ModuleFactory(moduleConfig);
+        if (isUnmounted) {
+          try {
+            (activeModule as any).emscripten_cancel_main_loop?.();
+          } catch (cleanupErr) {
+            console.warn("[WASM] Cleanup warning:", cleanupErr);
+          }
+          return;
+        }
         console.log("WASM module loaded:", activeModule);
       } catch (err) {
         console.error("Error loading WASM module:", err);
@@ -181,41 +217,33 @@ const MazeBuilderComponent = () => {
 
     loadModule();
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        if (entry.target === document.documentElement) {
-          setWindowSize({
-            width: window.innerWidth,
-            height: window.innerHeight,
-          });
-        }
-      }
-    });
-
-    resizeObserver.observe(document.documentElement);
-
     // Cleanup function
     return () => {
-      if (intervalId !== -1) {
-        clearInterval(intervalId);
+      isUnmounted = true;
+      if (intervalIdRef.current != null) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
       }
-      resizeObserver.disconnect();
-      resizeObserver.unobserve(document.documentElement);
+      try {
+        instanceRef.current?.delete?.();
+      } catch (cleanupErr) {
+        console.warn("[WASM] Instance cleanup warning:", cleanupErr);
+      }
+      instanceRef.current = null;
+      // @ts-ignore
+      window.triggerExport = undefined;
     };
   }, []); // useEffect
 
   return (
     <>
-      <div>
-        <span>
-          <canvas
-            id="canvas"
-            className="emscripten"
-            ref={canvasRef}
-            width={windowSize.width}
-            height={windowSize.height}
-          />
-        </span>
+      <div style={{ width: "100%", height: "100%", display: "flex" }}>
+        <canvas
+          id="canvas"
+          className="emscripten"
+          ref={canvasRef}
+          style={{ display: "block", flex: 1 }}
+        />
       </div>
     </>
   );
