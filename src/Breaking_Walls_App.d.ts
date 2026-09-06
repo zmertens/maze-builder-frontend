@@ -39,6 +39,7 @@ export interface ModuleConfig {
   canvas?: HTMLCanvasElement;
   print?(...args: any[]): void;
   onRuntimeInitialized?(): void;
+  requestFullscreen?: undefined;
 }
 
 /**

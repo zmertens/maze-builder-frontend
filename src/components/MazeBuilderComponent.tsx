@@ -23,6 +23,7 @@ interface ModuleConfig {
   canvas?: HTMLCanvasElement;
   print?(...args: any[]): void;
   onRuntimeInitialized?(): void;
+  requestFullscreen?: undefined;
 }
 
 const MazeBuilderComponent = () => {
@@ -155,7 +156,10 @@ const MazeBuilderComponent = () => {
         };
 
         // Create the Module configuration object after initializeEngine is defined
-        const ModuleConfig: ModuleConfig = {
+        // @ts-ignore - requestFullscreen is set by Emscripten/SDL3 at runtime
+        const ModuleConfig: any = {
+          // Ensure SDL can safely override this hook during runtime init
+          requestFullscreen: undefined,
           canvas: c,
           print: (...args: any[]) => {
             console.log("[WASM]", ...args);
