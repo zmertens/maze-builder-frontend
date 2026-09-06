@@ -5,7 +5,9 @@ import tla from 'rollup-plugin-tla';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+  ],
   test: {
     globals: true,
     environment: 'jsdom'
@@ -17,6 +19,11 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin",
     },
+    fs: {
+      strict: false
+    },
+    // Disable middlewares that may impact performance
+    middlewareMode: false,
   },
   worker: {
     format: 'es',
